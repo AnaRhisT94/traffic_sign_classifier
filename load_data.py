@@ -3,9 +3,10 @@ import pickle
 
 # TODO: Fill this in based on where you saved the training and testing data
 
-training_file = ?
-validation_file=?
-testing_file = ?
+## Load the data ##
+training_file = "./data/train.p"
+validation_file ="./data/valid.p" 
+testing_file = "./data/test.p"
 
 with open(training_file, mode='rb') as f:
     train = pickle.load(f)
