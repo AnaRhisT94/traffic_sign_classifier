@@ -135,8 +135,8 @@ Here are the results of the prediction:
 | Priority Road                                        | Priority Road                                 |
 | Keep Right                                           | Keep Right                                    |
 |Turn Left Ahead                                       | Turn Left Ahead                               |
-|General Caution                                       | General Caution                               |
-|Road work                                             | Speed Limit(70km/h)                                     |
+|General Caution                                       | Speed Limit(70km/h)                               |
+|Road work                                             | Road work                                     |
 | Stop                                  | Stop                          |
 
 Meaning that I have missed one prediction, so total of 87.5% accuracy on these 8 images:
