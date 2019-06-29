@@ -50,9 +50,16 @@ cd CarND-Traffic-Sign-Classifier-Project
 jupyter notebook Traffic_Sign_Classifier.ipynb
 ```
 
-### Requirements for Submission
-Follow the instructions in the `Traffic_Sign_Classifier.ipynb` notebook and write the project report using the writeup template as a guide, `writeup_template.md`. Submit the project code and writeup document.
+### Data Set Summary & Exploration
+I used the numpy library to calculate summary statistics of the traffic signs data set. Initial training data charecteristics is shown below:
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+The size of training set is 34799
+The size of test set is 12630
+The shape of a traffic sign image is (32, 32, 3)
+The number of unique classes/labels in the data set is 43
+
+### Include an exploratory visualization of the dataset.
+Here is an exploratory visualization of the data set. Below images shows the German Traffic Signs and its class. Image plot showing a random image from every class.
+
+![alt text](https://github.com/AnaRhisT94/traffic_sign_classifier/blob/master/Images/Show%20random%20image%20from%20every%20class.JPG)
 
