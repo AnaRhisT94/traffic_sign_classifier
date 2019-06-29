@@ -5,6 +5,8 @@ import random
 import numpy as np
 import cv2
 import pandas as pd
+from sklearn.utils import shuffle
+from sklearn.model_selection import train_test_split
 # TODO: Fill this in based on where you saved the training and testing data
 
 # Download the data
@@ -113,7 +115,8 @@ def show_images(images, cols = 1, titles = None):
     
     fig.set_size_inches(np.array(fig.get_size_inches()) * n_images)
     plt.show()
-    
+
+# We select random images and display them in console    
 def select_random_images_by_classes(features, labels, n_features):
   
   indexes = []
@@ -128,6 +131,7 @@ def select_random_images_by_classes(features, labels, n_features):
     
     # If I found the class in _classes, then append it to -1
     # This will make the selection of indexes unique and random
+    # in that way we add all the classes and index of random images from every class
     for i in range(0, len(_classes)):
 
       if _class == _classes[i]:
@@ -236,3 +240,31 @@ n_classes, n_counts = np.unique(y_train, return_counts=True)
 
 # re-plot the dist chart to see the new dist of the classes
 plot_distribution_of_classes(n_classes, n_counts, 'Classes', '# Training Examples', 0.7, 'blue')
+
+# Grayscale the images so the NN performance will be higher
+X_train_gray = np.sum(X_train/3, axis=3, keepdims=True)
+
+X_test_gray = np.sum(X_test/3, axis=3, keepdims=True)
+
+X_valid_gray = np.sum(X_valid/3, axis=3, keepdims=True)
+
+# check grayscale images
+select_random_images_by_classes(X_train_gray.squeeze(), y_train, n_train)
+
+# According to CS231N http://cs231n.github.io/neural-networks-2/#datapre
+# It's very important to subtract the mean of the image
+# In that way we'll center the cloud data in the origin
+X_train_gray -= np.mean(X_train_gray)
+
+X_test_gray -= np.mean(X_test_gray)
+
+X_train = X_train_gray
+
+X_test = X_test_gray
+
+## Now we'll split the data and then shuffle it with sklearn library
+# and its sub-library model_selection
+# Note: I decided not to use the provided validation data,
+# But rather use the augmented data I created to X_train with 51k examples
+X_train, X_validation, y_train, y_validation = train_test_split(X_train, y_train, test_size=0.20, random_state=42)
+X_train, y_train = shuffle(X_train, y_train)
