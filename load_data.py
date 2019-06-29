@@ -3,6 +3,8 @@ import pickle
 import matplotlib.pyplot as plt
 import random
 import numpy as np
+import cv2
+import pandas as pd
 # TODO: Fill this in based on where you saved the training and testing data
 
 # Download the data
@@ -22,10 +24,6 @@ with open(validation_file, mode='rb') as f:
     valid = pickle.load(f)
 with open(testing_file, mode='rb') as f:
     test = pickle.load(f)
-    
-X_train, y_train = train['features'], train['labels']
-X_valid, y_valid = valid['features'], valid['labels']
-X_test, y_test = test['features'], test['labels']
 
 # Assining the training features and labels   
 # 32x32x3 images    
@@ -147,3 +145,94 @@ def select_random_images_by_classes(features, labels, n_features):
   show_images(images, titles = titles)
   
 select_random_images_by_classes(X_train, y_train, n_train)
+
+
+## Augmentation to images
+## Thanks to this github rep. https://github.com/vxy10/ImageAugmentation
+
+def augment_brightness_camera_images(image):
+    image1 = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
+    random_bright = .25+np.random.uniform()
+    #print(random_bright)
+    image1[:,:,2] = image1[:,:,2]*random_bright
+    image1 = cv2.cvtColor(image1,cv2.COLOR_HSV2RGB)
+    return image1
+
+def transform_image(img,ang_range,shear_range,trans_range,brightness=0):
+    '''
+    This function transforms images to generate new images.
+    The function takes in following arguments,
+    1- Image
+    2- ang_range: Range of angles for rotation
+    3- shear_range: Range of values to apply affine transform to
+    4- trans_range: Range of values to apply translations over.
+
+    A Random uniform distribution is used to generate different parameters for transformation
+
+    '''
+    # Rotation
+
+    ang_rot = np.random.uniform(ang_range)-ang_range/2
+    rows,cols,ch = img.shape    
+    Rot_M = cv2.getRotationMatrix2D((cols/2,rows/2),ang_rot,1)
+
+    # Translation
+    tr_x = trans_range*np.random.uniform()-trans_range/2
+    tr_y = trans_range*np.random.uniform()-trans_range/2
+    Trans_M = np.float32([[1,0,tr_x],[0,1,tr_y]])
+
+    # Shear
+    pts1 = np.float32([[5,5],[20,5],[5,20]])
+
+    pt1 = 5+shear_range*np.random.uniform()-shear_range/2
+    pt2 = 20+shear_range*np.random.uniform()-shear_range/2
+
+    # Brightness
+
+    pts2 = np.float32([[pt1,5],[pt2,pt1],[5,pt2]])
+
+    shear_M = cv2.getAffineTransform(pts1,pts2)
+
+    img = cv2.warpAffine(img,Rot_M,(cols,rows))
+    img = cv2.warpAffine(img,Trans_M,(cols,rows))
+    img = cv2.warpAffine(img,shear_M,(cols,rows))
+
+    if brightness == 1:
+      img = augment_brightness_camera_images(img)
+
+    return img
+
+# Testing an image with augmentation
+images = []
+
+for i in range(0, 10):
+  images.append(transform_image(X_train[10],10,5,5,brightness=1))
+
+show_images(images)
+
+## Optimize distirbution so classes with less than 1k examples will
+## have additional 1k - #_of_examples which will be augmented and added
+for _class, count in zip(n_classes, n_counts):
+  new_images = []
+  new_classes = []
+  
+  if count < 1000:
+    y_train_length = y_train.shape[0]
+    index = 0
+    
+    for i in range(0, 1000-count):
+      # search for the index that will will represent the class
+      # this index is is for matching y_train and x_train
+      while y_train[index] != _class:
+        index = random.randint(0, y_train_length-1)
+      new_images.append(transform_image(X_train[index],10,5,5,brightness=1))
+      new_classes.append(_class)
+      
+    X_train = np.concatenate((X_train, np.array(new_images)))
+    y_train = np.concatenate((y_train, np.array(new_classes)))
+
+# count how many examples per class    
+n_classes, n_counts = np.unique(y_train, return_counts=True)
+
+# re-plot the dist chart to see the new dist of the classes
+plot_distribution_of_classes(n_classes, n_counts, 'Classes', '# Training Examples', 0.7, 'blue')
