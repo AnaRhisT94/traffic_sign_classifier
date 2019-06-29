@@ -7,6 +7,9 @@ import cv2
 import pandas as pd
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
+import tensorflow as tf
+from tensorflow.contrib.layers import flatten
+from archi_lenet import LeNet
 # TODO: Fill this in based on where you saved the training and testing data
 
 # Download the data
@@ -268,3 +271,145 @@ X_test = X_test_gray
 # But rather use the augmented data I created to X_train with 51k examples
 X_train, X_validation, y_train, y_validation = train_test_split(X_train, y_train, test_size=0.20, random_state=42)
 X_train, y_train = shuffle(X_train, y_train)
+
+## Init variables
+EPOCHS = 100
+BATCH_SIZE = 128
+x = tf.placeholder(tf.float32, (None, 32, 32, 1))
+y = tf.placeholder(tf.int32, (None))
+one_hot_y = tf.one_hot(y, 43)
+
+rate = 0.001
+
+# Use LeNet architecture
+logits = LeNet(x)
+# Use softmax cross-entropy loss
+cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=one_hot_y, logits=logits)
+# Calculate the loss
+loss_operation = tf.reduce_mean(cross_entropy)
+# Optimize the loss with Adam, which uses momentum - helps to use a larger step size which is effective
+optimizer = tf.train.AdamOptimizer(learning_rate = rate)
+training_operation = optimizer.minimize(loss_operation)
+
+correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(one_hot_y, 1))
+accuracy_operation = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+saver = tf.train.Saver()
+
+def evaluate(X_data, y_data):
+    num_examples = len(X_data)
+    total_accuracy = 0
+    sess = tf.get_default_session()
+    for offset in range(0, num_examples, BATCH_SIZE):
+        batch_x, batch_y = X_data[offset:offset+BATCH_SIZE], y_data[offset:offset+BATCH_SIZE]
+        accuracy = sess.run(accuracy_operation, feed_dict={x: batch_x, y: batch_y})
+        total_accuracy += (accuracy * len(batch_x))
+    return total_accuracy / num_examples
+
+with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())
+    num_examples = len(X_train)
+    
+    print("Training...")
+    print()
+    for i in range(EPOCHS):
+        X_train, y_train = shuffle(X_train, y_train)
+        for offset in range(0, num_examples, BATCH_SIZE):
+            end = offset + BATCH_SIZE
+            batch_x, batch_y = X_train[offset:end], y_train[offset:end]
+            sess.run(training_operation, feed_dict={x: batch_x, y: batch_y})
+            
+        validation_accuracy = evaluate(X_validation, y_validation)
+        print("EPOCH {} ...".format(i+1))
+        print("Validation Accuracy = {:.3f}".format(validation_accuracy))
+        print()
+        
+    saver.save(sess, './lenet')
+    print("Model saved")
+    
+    
+### Load the images and plot them here.
+### Feel free to use as many code cells as needed.
+
+## pre-process images
+def pre_process_images(my_images, labels):
+    X_images_test = []
+    titles = []
+    
+    for image, label in zip(my_images, labels):
+        img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        X_images_test.append(img)
+        titles.append("class " + str(label))
+    
+    show_images(X_images_test, titles=titles)
+    
+    X_images_test = np.array(X_images_test)
+    
+    X_images_test_gray = np.sum(X_images_test/3, axis=3, keepdims=True)
+    
+    X_images_test_gray -= np.mean(X_images_test_gray)
+    
+    X_images_test = X_images_test_gray
+    
+    return X_images_test
+
+
+#reading in an image
+import glob
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+
+# define plot configuration
+fig, axs = plt.subplots(2,4, figsize=(4, 2))
+fig.subplots_adjust(hspace = .2, wspace=.001)
+axs = axs.ravel()
+
+my_images = []
+my_labels = [11, 1, 12, 38, 34, 18, 25, 14]
+
+# extract all the images to my_images list, also show the imag
+for i, img in enumerate(glob.glob('./test_images/*.png')):
+    image = cv2.imread(img)
+    axs[i].axis('off')
+    axs[i].imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    my_images.append(image) 
+
+# we pre-process the images before we predict the classes with our model
+my_images_normalized = pre_process_images(my_images, my_labels)
+
+# Prediction
+with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())
+    saver3 = tf.train.import_meta_graph('./lenet.meta')
+    saver3.restore(sess, "./lenet")
+    
+    accuracy = evaluate(my_images_normalized, my_labels)
+    
+    print("Accuracy = " + str(accuracy*100) + "%")
+    
+## Visualization of the top k=3 guesses     
+softmax_logits = tf.nn.softmax(logits)
+top_k = tf.nn.top_k(softmax_logits, k=3)
+
+with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())
+    saver = tf.train.import_meta_graph('./lenet.meta')
+    saver.restore(sess, "./lenet")
+    my_softmax_logits = sess.run(softmax_logits, feed_dict={x: my_images_normalized})
+    my_top_k = sess.run(top_k, feed_dict={x: my_images_normalized})
+    
+    # define figure and sub-plots
+    fig, axs = plt.subplots(len(my_images),4, figsize=(12, 14))
+    axs = axs.ravel()
+    
+    # plot original image
+    for i, image in enumerate(my_images):
+        axs[4*i].axis('off')
+        axs[4*i].imshow(image)
+        axs[4*i].set_title('Original')
+        ## plot top 3 guesses
+        for j in range(3):
+          guess = my_top_k[1][i][j]
+          index = np.argwhere(y_validation == guess)[0]
+          axs[4*i+j+1].axis('off')
+          axs[4*i+j+1].imshow(X_validation[index].squeeze(), cmap='gray')
+          axs[4*i+j+1].set_title('top guess: {} ({:.0f}%)'.format(guess, 100*my_top_k[0][i][j]))    
