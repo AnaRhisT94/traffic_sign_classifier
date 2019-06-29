@@ -40,6 +40,7 @@ def LeNet(x):
 
     # Flatten. Input = 5x5x16. Output = 400.
     fc0   = flatten(conv2)
+    fc0 =   tf.nn.dropout(fc0, 0.5)
     
     # Layer 3: Fully Connected. Input = 400. Output = 120.
     fc1_W = tf.Variable(tf.truncated_normal(shape=(400, 120), mean = mu, stddev = sigma))
@@ -56,7 +57,8 @@ def LeNet(x):
     
     # Activation.
     fc2    = tf.nn.relu(fc2)
-
+    fc2 =    tf.nn.dropout(fc2, 0.5)
+    
     # Layer 5: Fully Connected. Input = 84. Output = 43.
     fc3_W  = tf.Variable(tf.truncated_normal(shape=(84, 43), mean = mu, stddev = sigma))
     fc3_b  = tf.Variable(tf.zeros(43))
