@@ -106,4 +106,41 @@ Now we'll optimize the distribution of the classes and add to the dataset augmen
 | Fully connected_3        | Output = 43.                                                                   |
  
 
+## Training parameters values that give 97% accuracy:
 
+* Learning Rate = 0.001
+* Epoch = 100
+* batch Size = 128
+* Dropout at FC 0 layer = 0.5
+* Dropout at FC 2 layer = 0.5
+
+## Final results of the training
+![alt text](https://github.com/AnaRhisT94/traffic_sign_classifier/blob/master/Images/Accuracy%20Results.JPG)
+
+### Test a Model on New Images
+
+### 1. Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
+
+Here are five German traffic signs that I found on the web: ( 8 total )
+https://github.com/AnaRhisT94/traffic_sign_classifier/blob/master/Images/pre-process%20the%20predicted%20images.JPG
+
+#### 2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
+
+Here are the results of the prediction:
+
+| Image                                                |     Prediction                                |
+|:----------------------------------------------------:|:---------------------------------------------:|
+| Right-of-way at the next Intersection                | Right-of-way at the next Intersection         |
+| Speed Limit(30km/h)                                  | Speed Limit(30km/h)                           |
+| Priority Road                                        | Priority Road                                 |
+| Keep Right                                           | Keep Right                                    |
+|Turn Left Ahead                                       | Turn Left Ahead                               |
+|General Caution                                       | General Caution                               |
+|Road work                                             | Speed Limit(70km/h)                                     |
+| Stop                                  | Stop                          |
+
+Meaning that I have missed one prediction, so total of 87.5% accuracy on these 8 images:
+![alt text](https://github.com/AnaRhisT94/traffic_sign_classifier/blob/master/Images/Accuracyc%2087.5%25.JPG)
+
+Lastly, Figure showing Top 3 Probabilities for detected images.
+![alt text](https://github.com/AnaRhisT94/traffic_sign_classifier/blob/master/Images/top%20k%3D3%20guesses.png)
