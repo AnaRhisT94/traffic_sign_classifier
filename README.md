@@ -63,3 +63,47 @@ Here is an exploratory visualization of the data set. Below images shows the Ger
 
 ![alt text](https://github.com/AnaRhisT94/traffic_sign_classifier/blob/master/Images/Show%20random%20image%20from%20every%20class.JPG)
 
+Then, in the pre-processing step we see the distirbution of the classes and their examples number:
+![alt text](https://github.com/AnaRhisT94/traffic_sign_classifier/blob/master/Images/plot_distribution_of_classes.JPG)
+
+We can see that the distirbution of the classes isn't good, so in the next steps we will fix it.
+
+## First of all, Augmentation
+I used the following transformation on the images:
+* Translate
+* Rotate
+* Sheering
+* Brighness
+
+## Testing of augmentation of a random image:
+![alt text](https://github.com/AnaRhisT94/traffic_sign_classifier/blob/master/Images/Augmentation%20technique.JPG)
+
+## And some more augmentation:
+![alt text](https://github.com/AnaRhisT94/traffic_sign_classifier/blob/master/Images/More%20augmentation.JPG)
+
+## Distribution optimization
+Now we'll optimize the distribution of the classes and add to the dataset augmented images for all the classes that have less than 1000 examples, and we'll get the following optimized distribution
+![alt text](https://github.com/AnaRhisT94/traffic_sign_classifier/blob/master/Images/optimize%20distribution.JPG)
+
+## Network Architecture: LeNet
+
+| Layer                                  |     Description                                                                  |
+|:--------------------------:|:------------------------------------------------------:|
+| Input                                  | 32x32x1 Grayscale image                                          |
+| Convolution_1 5x5       | 1x1 stride, VALID padding, outputs 28X28X6                |
+| RELU                                  |                                                                                              |
+| Max pooling                    | 2x2 stride,  outputs 14x14x6                                    |
+| Convolution_2 5x5       | 1x1 stride, VALID padding, outputs 10x10x16   |
+| RELU                                  |                                                                                              |
+| Max pooling                    | 2x2 stride,  outputs 5x5x16                                       |
+| Fully connected_0        | Output = 400.                                                                 |
+|Dropout                             |Keep probability – 0.5                                                 |
+| Fully connected_1        | Output = 120.                                                                 |
+| RELU                                  |                                                                                              |
+| Fully connected_2        | Output = 84.                                                                   |
+| RELU                                  |                                                                                              |
+|Dropout                             |Keep probability = 0.5                                                 |
+| Fully connected_3        | Output = 43.                                                                   |
+ 
+
+
