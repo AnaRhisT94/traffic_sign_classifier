@@ -1,5 +1,5 @@
 ## Installation
-Just run `readTrafficSigns.py` and that's it. 
+Just run `load_data.py` and that's it. 
 
 ## Project: Build a Traffic Sign Recognition Program
 [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
